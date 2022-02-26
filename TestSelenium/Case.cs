@@ -1,7 +1,10 @@
-﻿using OpenQA.Selenium;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Xunit;
@@ -10,114 +13,95 @@ namespace TestSelenium
 {
     class Case
     {
-        public static string RandomChar(int length)
-        {
-            char[] chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                     .ToCharArray();
-            StringBuilder sb = new StringBuilder();
-            Random random = new Random();
-            for (int i = 0; i < length; i++)
-            {
-                char c = chars[random.Next(chars.Length)];
-                sb.Append(c);
-            }
-            String randomString = sb.ToString();
-            return randomString;
-        }
 
         static void Main(string[] args)
         {
             //create the reference for the browser  
             IWebDriver driver = new ChromeDriver(@"C:\Users\Leo\Documents\Test Kerja\Test Selenium");
+            WebDriverWait waitelement = new WebDriverWait(driver, TimeSpan.FromSeconds(20));
 
             // ==== Case 1 ====
 
-            // navigate to URL Test Case 1 
-            driver.Navigate().GoToUrl("http://automationpractice.com/");
+            // navigate to URL
+            driver.Navigate().GoToUrl("https://www.ebay.com/");
             Thread.Sleep(2000);
 
-            // Check Element Sign in Exist
-            IWebElement checkDasboard = driver.FindElement(By.ClassName("login"));
-            Assert.True(checkDasboard.Text.Contains("Sign in"));
+            Console.WriteLine("--- Skenario 1 ---");
 
-            Console.WriteLine("--- Register Success New Account ---");
-
-            // Click Button Sign in
-            driver.FindElement(By.ClassName("login")).Click();
-            Thread.Sleep(2000);
-
-            //Generate Random String for Email
-            string email = RandomChar(12);
-
-            // Input Form Create an Account
-            driver.FindElement(By.Id("email_create")).SendKeys(email + "@gmail.com");
-            driver.FindElement(By.Id("SubmitCreate")).Click();
+            //CLick Search Category
+            driver.FindElement(By.Id("gh-btn")).Click();
+            driver.FindElement(By.XPath("//*[@id='wrapper']/div[1]/div/div/div[2]/div[1]/ul/li[7]/a")).Click();
+            driver.FindElement(By.XPath("//*[@id='electronics']/div/div[2]/div/ul/li[2]/a")).Click();
             Thread.Sleep(3000);
 
-            // Check Page Register
-            IWebElement checkRegisterPage = driver.FindElement(By.Id("center_column"));
-            Assert.True(checkRegisterPage.Enabled);
+            //Choose Filter
 
-            // Input Form Register
-            driver.FindElement(By.Id("id_gender1")).Click();
+            waitelement.Until(ExpectedConditions.ElementExists(By.ClassName("container")));
 
-            driver.FindElement(By.Id("customer_firstname")).SendKeys("Fakhruzzahid");
-            driver.FindElement(By.Id("customer_lastname")).SendKeys("Wahdah");
+            IWebElement allFilter = driver.FindElement(By.ClassName("container"));
+            allFilter.FindElement(By.XPath("//*[. = 'All Filters']")).Click();
 
-            driver.FindElement(By.Id("email")).Clear();
-            driver.FindElement(By.Id("email")).SendKeys(email + "@gmail.com");
-            driver.FindElement(By.Id("passwd")).SendKeys("password123");
-            driver.FindElement(By.Id("firstname")).SendKeys("Fakhruzzahid");
-            driver.FindElement(By.Id("lastname")).SendKeys("Wahdah");
-            driver.FindElement(By.Id("address1")).SendKeys("Jakarta Barat");
-            driver.FindElement(By.Id("city")).SendKeys("Jakarta Barat");
+            //Filter Screen
+            waitelement.Until(ExpectedConditions.ElementExists(By.ClassName("x-overlay__container")));
+            IWebElement filterScreen = driver.FindElement(By.ClassName("x-overlay__container"));
+            filterScreen.FindElement(By.XPath("//*[. = 'Screen Size']")).Click();
 
-            IWebElement selectState = driver.FindElement(By.XPath("//*[@id='id_state']/option[34]"));
-            selectState.Click();
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[. = '4.0 - 4.4 in']")));
+            IWebElement screenInput = driver.FindElement(By.ClassName("x-overlay__sub-panel"));
+            screenInput.FindElement(By.XPath("//*[. = '4.0 - 4.4 in']")).Click();
+
+            //Filter Price 
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-aspecttitle = 'price']")));
+            IWebElement filterprice = driver.FindElement(By.ClassName("x-overlay__container"));
+            filterprice.FindElement(By.XPath("//*[@data-aspecttitle = 'price']")).Click();
+
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@aria-label='Minimum Value, US Dollar']")));
+            driver.FindElement(By.XPath("//*[@aria-label='Minimum Value, US Dollar']")).SendKeys("1000000");
+            driver.FindElement(By.XPath("//*[@aria-label='Maximum Value, US Dollar']")).SendKeys("3000000");
+
+            //Filter Location 
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-aspecttitle='location']")));
+            IWebElement filterLocation = driver.FindElement(By.ClassName("x-overlay__container"));
+            filterLocation.FindElement(By.XPath("//*[@data-aspecttitle='location']")).Click();
+
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@data-value='US Only']")));
+            driver.FindElement(By.XPath("//*[@data-value='US Only']")).Click();
+            Thread.Sleep(3000);
+
+            //Click Button FilterApply
+            driver.FindElement(By.XPath("//*[@aria-label='Apply']")).Click();
+
+            //Check Filter is True
+
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[. = '3 filters applied']")));
+            Thread.Sleep(3000);
+
+            
+            // ==== Case 2 ====
+
+            // navigate to URL
+            driver.Navigate().GoToUrl("https://www.ebay.com/");
             Thread.Sleep(2000);
 
-            driver.FindElement(By.Id("postcode")).SendKeys("11510");
+            Console.WriteLine("--- Skenario 2 ---");
 
-            IWebElement selectCountry = driver.FindElement(By.XPath("//*[@id='id_country']/option[2]"));
-            selectCountry.Click();
-            Thread.Sleep(2000);
+            //Search
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@aria-label='Search for anything']")));
+            driver.FindElement(By.XPath("//*[@aria-label='Search for anything']")).SendKeys("Macbook");
 
-            driver.FindElement(By.Id("phone_mobile")).SendKeys("081335990344");
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[@aria-label='Select a category for search']")));
+            IWebElement selectSearch = driver.FindElement(By.XPath("//*[@aria-label='Select a category for search']"));
+            selectSearch.FindElement(By.XPath("//*[@value='58058']")).Click();
+            driver.FindElement(By.XPath("//*[@value='Search']")).Click();
 
-            driver.FindElement(By.Id("alias")).Clear();
-            driver.FindElement(By.Id("alias")).SendKeys("My address");
+            //Verify Search
+            waitelement.Until(ExpectedConditions.ElementExists(By.XPath("//*[. = 'macbook']")));
+            IWebElement checkSearch = driver.FindElement(By.XPath("//*[. = 'macbook']"));
+            Assert.True(checkSearch.Text.Contains("macbook"));
 
-            //Click Button Register
-            driver.FindElement(By.Id("submitAccount")).Click();
-            Thread.Sleep(2000);
-
-            //Check Success Register
-            IWebElement checkSuccess = driver.FindElement(By.ClassName("account"));
-            Assert.True(checkSuccess.Text.Contains("Fakhruzzahid Wahdah"));
-
-            Console.WriteLine("Success Create Account");
-
-            //Sign Out
-            driver.FindElement(By.ClassName("logout")).Click();
-
-
-            Console.WriteLine("--- Sign In New Account ---");
-
-            //Input Username and Password
-            driver.FindElement(By.Id("email")).SendKeys(email+"@gmail.com");
-            driver.FindElement(By.Id("passwd")).SendKeys("password123");
-
-            // Click Button Login
-            driver.FindElement(By.Id("SubmitLogin")).Click();
-
-            //Check Success Login
-            IWebElement loginsuccess = driver.FindElement(By.ClassName("account"));
-            Assert.True(loginsuccess.Text.Contains("Fakhruzzahid Wahdah"));
-
-            Console.WriteLine("Success Login");
-
-            driver.Close();
             Console.WriteLine("Test End and Success");
+            driver.Close();
+            
         }
 
     }
